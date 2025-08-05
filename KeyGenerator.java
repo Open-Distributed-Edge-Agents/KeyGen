@@ -3,6 +3,8 @@ import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Base64;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class KeyGenerator {
     public static String serializePublicKey(PublicKey publicKey) {
@@ -16,6 +18,12 @@ public class KeyGenerator {
     }
 
     public static void main(String[] args) throws Exception {
+        if (args.length < 1) {
+            System.err.println("Usage: java KeyGenerator <name>");
+            System.exit(1);
+        }
+        String name = args[0];
+
         // Generate RSA key pair
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
         keyGen.initialize(2048);
@@ -25,10 +33,16 @@ public class KeyGenerator {
         String publicKeyStr = serializePublicKey(pair.getPublic());
         String privateKeyStr = serializePrivateKey(pair.getPrivate());
 
-        // Print serialized keys
-        System.out.println("Public Key (Base64):");
-        System.out.println(publicKeyStr);
-        System.out.println("\nPrivate Key (Base64):");
-        System.out.println(privateKeyStr);
+        // Save keys to files
+        writeToFile(name + ".pub", publicKeyStr);
+        writeToFile(name + ".key", privateKeyStr);
+
+        System.out.println("Keys saved as " + name + ".pub and " + name + ".key");
+    }
+
+    private static void writeToFile(String filename, String content) throws IOException {
+        try (FileOutputStream fos = new FileOutputStream(filename)) {
+            fos.write(content.getBytes());
+        }
     }
 }
